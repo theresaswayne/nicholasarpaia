@@ -11,6 +11,7 @@
 require(tidyverse) # for data processing
 require(stringr) # for string harvesting
 require(RcppRoll) # for scanning interactions
+require(xfun) # for filename manipulation
 
 # ---- Parameters ----
 # change these as needed 
@@ -25,7 +26,7 @@ timeWindow <- 2
 # ---- Get the data ----
 # no message will be displayed. Choose the file to analyze
 selectedFile <- file.choose()
-inputFolder <- dirname(selectedFile) # the input is the parent of the selected file
+parentFolder <- dirname(selectedFile) # parent of the selected file
 
 df <- read_csv(selectedFile)
 
@@ -89,15 +90,41 @@ intPerALogical <- intPerALogical %>%
   arrange(as.integer(ObjA))
 
 
-# single column example
-# output is a vector giving the sums at each successive window
+# function to return TRUE if any rolling sums in the window = window size (consecutive contacts)
+intxnsWithoutT <- intxns[,-1] # omit the t column
+persist <- intxnsWithoutT %>%
+  summarise_all(function(x) {
+    ifelse(max(roll_sum(x, n = timeWindow, weights = NULL, fill = numeric(0),
+                        partial = FALSE, align = "left", normalize = TRUE,
+                        na.rm = FALSE)) == timeWindow, TRUE, FALSE)
+  })
 
-A1roll <- roll_sum(intxns$'1', n = timeWindow, weights = NULL, fill = numeric(0),
-                   partial = FALSE, align = "left", normalize = TRUE,
-                   na.rm = FALSE)
+# pivot the table to get the number and % persistent
+persistSummary <- persist %>% 
+  pivot_longer(cols = everything(), names_to = "ObjA", values_to = "Persistent")
 
-# TODO: Loop going across all ObjIDs
-# TODO: Ifelse or other statement recording TRUE if A1roll > 0
-# TODO: create output vector showing true or false for persistent interaction per ObjID
-# TODO: Calculate number of persistent interactions and % of total
+totalIntxns <- nrow(persistSummary)
+totalPersistent <- sum(persistSummary$Persistent == TRUE)
+fracPersistent <- totalPersistent/totalIntxns
+
+resultHeaders <- c("Filename", "Window (consecutive timepoints)", "Total Interacting",  "Persistent Interacting","Fraction Persistent")
+resultValues <- c(basename(selectedFile), timeWindow, totalIntxns, totalPersistent, fracPersistent)
+resultTable <- data.frame(rbind(resultHeaders, resultValues))
+names(resultTable) <- resultTable[1,]
+resultTable <- resultTable[-1,]
+
+# create output
+
+# intxns (may be able to use for survival analysis)
+intxnFile = paste(sans_ext(basename(selectedFile)), "_interactions.csv", sep = "")
+write_csv(intxns,file.path(parentFolder, intxnFile))
+
+# persistSummary (derived data)
+persistFile = paste(sans_ext(basename(selectedFile)), "_persistence.csv", sep = "")
+write_csv(persistSummary,file.path(parentFolder, persistFile))
+
+# summary (final calculations)
+resultFile = paste(sans_ext(basename(selectedFile)), "_summary.csv", sep = "")
+write_csv(resultTable,file.path(parentFolder, resultFile))
+
 # TODO: Survival curves

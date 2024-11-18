@@ -1,0 +1,17 @@
+filename,Label,OverlapVolume(pxl),ColocFromAvolume,ColocFromBvolume,ColocFromABvolume,Dist CenterA-CenterB,Dist min CenterA-EdgeB,Dist min EdgeA-CenterB,timepoint
+ColocResults_001.csv,objA1_objB7,86,100,1.021,1.021,37.465,0.176,33.444,1
+ColocResults_001.csv,objA5_objB7,33,100,0.392,0.392,69.794,0.339,66.809,1
+ColocResults_001.csv,objA6_objB7,36,100,0.428,0.428,14.063,0.413,11.6,1
+ColocResults_001.csv,objA7_objB7,60,100,0.713,0.713,34.797,0.224,30.334,1
+ColocResults_002.csv,objA1_objB8,108,100,1.523,1.523,45.129,0.257,36.275,2
+ColocResults_002.csv,objA5_objB8,37,92.5,0.522,0.522,99.724,0.351,96.257,2
+ColocResults_002.csv,objA6_objB8,31,100,0.437,0.437,42.008,0.102,39.739,2
+ColocResults_002.csv,objA7_objB8,51,79.688,0.719,0.718,61.055,0.529,56.883,2
+ColocResults_002.csv,objA17_objB3,78,100,0.898,0.898,6.929,0.381,2.339,2
+ColocResults_002.csv,objA18_objB3,49,100,0.564,0.564,32.153,0.638,28.347,2
+ColocResults_002.csv,objA23_objB3,145,100,1.67,1.67,23.445,0.341,14.287,2
+ColocResults_003.csv,objA1_objB10,128,100,1.859,1.859,26.924,0.37,19.978,3
+ColocResults_003.csv,objA2_objB10,29,18.59,0.421,0.414,101.083,1.019,94.06,3
+ColocResults_003.csv,objA5_objB10,29,100,0.421,0.421,49.658,0.614,47.075,3
+ColocResults_003.csv,objA6_objB10,32,100,0.465,0.465,5.783,0.435,3.39,3
+ColocResults_003.csv,objA7_objB10,68,100,0.988,0.988,21.781,0.49,17.571,3
