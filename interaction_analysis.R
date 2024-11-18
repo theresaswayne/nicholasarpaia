@@ -4,7 +4,9 @@
 # CSV data from multiple timepoints are merged 
 # Cols: filename, Label, timepoint and other data (not needed)
 # Label column data is of the format objA1_objB7 
-# Outputs number of interactions per object in the A class and consecutive interactions in a given window size
+# Outputs:
+# number of objects in the A class that show interactions
+# number of objects in the A class that show persistent interactions 
 
 # ---- Setup ----
 
@@ -20,8 +22,13 @@ require(xfun) # for filename manipulation
 objAname = "Treg"
 objBname = "Fibroblast"
 
-# time window size for checking persistence of interactions
-timeWindow <- 2
+# time window size (units = timepoints) for checking persistence of interactions
+# threshold is the number of interactions within that window to be considered consistent
+# if time window == threshold, then you must have that many consecutive interactions
+# if time window > threshold, then the interactions may be non-consecutive but must occur within the window
+
+timeWindow <- 3
+threshold <- 3
 
 # ---- Get the data ----
 # no message will be displayed. Choose the file to analyze
@@ -96,7 +103,7 @@ persist <- intxnsWithoutT %>%
   summarise_all(function(x) {
     ifelse(max(roll_sum(x, n = timeWindow, weights = NULL, fill = numeric(0),
                         partial = FALSE, align = "left", normalize = TRUE,
-                        na.rm = FALSE)) == timeWindow, TRUE, FALSE)
+                        na.rm = FALSE)) >= threshold, TRUE, FALSE)
   })
 
 # pivot the table to get the number and % persistent
@@ -107,8 +114,9 @@ totalIntxns <- nrow(persistSummary)
 totalPersistent <- sum(persistSummary$Persistent == TRUE)
 fracPersistent <- totalPersistent/totalIntxns
 
-resultHeaders <- c("Filename", "Window (consecutive timepoints)", "Total Interacting",  "Persistent Interacting","Fraction Persistent")
-resultValues <- c(basename(selectedFile), timeWindow, totalIntxns, totalPersistent, fracPersistent)
+# TODO: Add threshold to table
+resultHeaders <- c("Filename", "Window", "Threshold", "Total Interacting",  "Persistent Interacting","Fraction Persistent")
+resultValues <- c(basename(selectedFile), timeWindow, threshold, totalIntxns, totalPersistent, fracPersistent)
 resultTable <- data.frame(rbind(resultHeaders, resultValues))
 names(resultTable) <- resultTable[1,]
 resultTable <- resultTable[-1,]
