@@ -31,12 +31,39 @@ count_freq <- function(timestamps){
 out <- group_by(testdata, objA) %>% 
   summarise(freq = count_freq(t)) 
 
-# create a vector containing the interacting timepoints for a single object
+# create a logical vector containing the interacting timepoints for a single object
 timepoints <- min(t):max(t)
 objA1int <- testdata %>% 
-  filter(objA == 1)
-objA1times <- timepoints %in% objA1int$t 
+  filter(objA == 1) # rows of the dataset where obj A1 is interactings
+
+objA1times <- timepoints %in% objA1int$t # all timepoints, TRUE where A1 is interacting, FALSE where not
 
 # now we need a function or loop to apply this across all objA's 
 # see https://stackoverflow.com/questions/55921893/check-for-a-match-between-a-list-of-values-and-a-column-entry-in-r
 
+objA_IDs <- sort(unique(testdata$objA))
+
+
+# set it up as a for loop
+
+output <- data.frame("t" = timepoints) # this serves as the 1st col
+
+for (obj in objA_IDs) {
+  objInts <- testdata %>% 
+    filter(objA == obj)
+  objTimes <- timepoints %in% objInts$t
+  objName <- as.character(obj)
+  output[[paste0("",obj)]] <- objTimes
+#  output <- output %>%
+#    mutate(objName = objTimes)
+}
+
+#df <- data.frame(seasons = c(1,3,2,4,3,4,1,1,1))
+for(i in objA_IDs) {
+  output[[paste0("",i)]] <- ifelse(testdata$objA==i,1,0)
+}
+
+df <- data.frame(seasons = c(1,3,2,4,3,4,1,1,1))
+for(i in sort(unique(df$seasons))) {
+  df[[paste0("",i)]] <- ifelse(df$seasons==i,1,0)
+}
