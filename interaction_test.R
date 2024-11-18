@@ -44,7 +44,11 @@ objA1times <- timepoints %in% objA1int$t # all timepoints, TRUE where A1 is inte
 objA_IDs <- sort(unique(testdata$objA))
 
 
-# set it up as a for loop
+# set it up as a for loop (could probably be converted to lapply, se)
+# https://www.r-bloggers.com/2019/01/parallelize-a-for-loop-by-rewriting-it-as-an-lapply-call/
+  
+# see https://stackoverflow.com/questions/55921893/check-for-a-match-between-a-list-of-values-and-a-column-entry-in-r
+
 
 output <- data.frame("t" = timepoints) # this serves as the 1st col
 
@@ -54,16 +58,6 @@ for (obj in objA_IDs) {
   objTimes <- timepoints %in% objInts$t
   objName <- as.character(obj)
   output[[paste0("",obj)]] <- objTimes
-#  output <- output %>%
-#    mutate(objName = objTimes)
 }
 
-#df <- data.frame(seasons = c(1,3,2,4,3,4,1,1,1))
-for(i in objA_IDs) {
-  output[[paste0("",i)]] <- ifelse(testdata$objA==i,1,0)
-}
 
-df <- data.frame(seasons = c(1,3,2,4,3,4,1,1,1))
-for(i in sort(unique(df$seasons))) {
-  df[[paste0("",i)]] <- ifelse(df$seasons==i,1,0)
-}
