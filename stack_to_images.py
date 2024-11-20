@@ -22,6 +22,7 @@ from net.imglib2.view import Views
 from ij import IJ, ImagePlus, ImageStack
 from ij.process import ImageProcessor, FloatProcessor, StackProcessor
 import string
+from ij import WindowManager
 
 # Find image files
 inputdir = str(inDir) # convert the directory object into a string
@@ -36,76 +37,51 @@ if len(fnames) < 1: # no files
 	raise Exception("No image files found in %s" % inputdir)
 
 print "Processing",len(fnames), "stacks"
-
+		
 for fname in fnames:
 
 	currentFile = os.path.basename(fname)
 	print "Processing:",currentFile
 	
-	imp = IJ.openImage(os.path.join(inputdir, fname) # open image
-	
+	imp = IJ.openImage(os.path.join(inputdir, fname)) # open image
+	stack = imp.getStack()
 	# get number of t slices, channels, etc
-	# check if Z or T is the format
-	# If needed re-order to T
-	# IJ.run("Re-order Hyperstack ...", "channels=[Channels (c)] slices=[Frames (t)] frames=[Slices (z)]");
+	slices = imp.getNSlices()
+	frames = imp.getNFrames()
+	#stack.getDimensions(width, height, channels, slices, frames)
+
+	# fix Z/T confusion
+	if slices > 1:
+		print "Re-ordering"
+		IJ.run("Re-order Hyperstack ...", "channels=[Channels (c)] slices=[Frames (t)] frames=[Slices (z)]")
+		# get the new numbers
+		#stack.getDimensions(width, height, channels, slices, frames)
+		slices = imp.getNSlices()
+		frames = imp.getNFrames()
+	else:
+		print "No need to re-order"
+		
+	# show the image so we can use the IJ.run later
+	imp.show()
 	
 	# loop through frames
-	# for frameNum in range(0, frames):
-		# method syntax
-		# run​(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT)
-		
-		# duplicate this frame
-		impFrame = new Duplicator().run(imp, 1, numChannels, 1, 1, frameNum, frameNum);
-		
-		# todo: format with leading zeroes
+	for frameNum in range(1, frames+1):
+		print "Processing frame",frameNum
 		
 		basename = currentFile[0:-4] # removes .tif
-		frameName = string.join((basename, "_t", str(frameNum), image_extension), "")frameName = currentFile
-		impFrame.setTitle(
+		frameNumPadded = str(frameNum).zfill(3)
+		frameName = string.join((basename, "_t", frameNumPadded, ".tif"), "")
+		
+		IJ.run("Duplicate...", "title="+frameName+" duplicate frames="+str(frameNum)+"-"+str(frameNum))
 
+		impFrame = wm.getImage(frameName)
+		
+		# print "Saving image",str(frameNum),"with name", frameName
+		IJ.save(impFrame, os.path.join(outputdir, frameName))
 
-
-
-// selected channels 1-3, slice 2
-imp = new Duplicator().run(imp, 1, 3, 2, 2, 1, 1);
-
-# alternative-- selected channels 1-3, slice 3
-# IJ.run("Make Substack...", "channels=1-3 slices=3");
-
-
-
-
-# Open and stack images
-
-for stackIndex in range(0,numStacks):
-
-	imageStartIndex = stackIndex * numTimepoints # 0 for the first one
-	imageEndIndex = imageStartIndex + numTimepoints # 0 through 25 if there are 25 timepoints
-	print "Creating stack", stackIndex, "from images",imageStartIndex,"to",imageEndIndex
-	
-	currentFile = os.path.basename(fnames[imageStartIndex])
-	print "First filename:",currentFile
-	
-	imp = IJ.openImage(os.path.join(inputdir, fnames[imageStartIndex])) # open first image
-	ip = imp.getProcessor()
-	new_stack = ImageStack(imp.width, imp.height) # new stack with size based on the image
-	new_stack.addSlice(currentFile, ip) # add the 1st image to the stack
-	
-	for fnameIndex in range(imageStartIndex + 1, imageEndIndex): # subset of the original array
-		currentFile = os.path.basename(fnames[fnameIndex])
-		print "Adding image",currentFile
-		imp = IJ.openImage(os.path.join(inputdir, currentFile)) # open next image
-		ip = imp.getProcessor()
-		new_stack.addSlice(currentFile, ip) # slice label is orig file name
-		# --- end stack creation loop
-	
-	basename = currentFile[0:-8] # assumes 3-digit timepoint plus .tif
-	fileName = string.join((basename, image_extension), "")
-	print "Saving stack",stackIndex,"with name", fileName
-	stackImp = ImagePlus(fileName, new_stack) # generate an ImagePlus from the stack
-	IJ.save(stackImp, os.path.join(outputdir, fileName))  #... so we can save it
-	# --- end folder loop 
-	
+		impFrame.close() # the frame
+			
+	imp.close() # the stack
 
 
 print "Finished"
