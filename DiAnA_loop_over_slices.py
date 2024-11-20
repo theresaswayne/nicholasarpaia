@@ -54,16 +54,6 @@ for index in range(1, n_slices+1):
 	rt = rt_Window.getResultsTable()
 	rt.save(os.path.join(outputdir, outputName))
 	
-	# TODO: create a table of interactions
-	# -- columns: slice index, Treg index, Fb index, total Tregs (max value of stack?)
-	# -- loop through the colocresults table and collect the label column
-	# -- split the label by "_" and delete objA, objB to retrieve the object indices
-	# -- save this table representing each contact
-	# further analysis may be best done in R
-	# -- probably group by Treg ID, get total contacts per Treg
-	# -- create a table of persistent contacts per Treg: total per time bin specified 
-	# -- create a summary of contacts: Total Tregs , number of timepoints, number of contacts, number of persistent contacts
-		
 	# clean up slices
 	win = wm.getWindow("coloc")
 	win.close()
