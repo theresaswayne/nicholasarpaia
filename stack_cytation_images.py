@@ -50,10 +50,10 @@ for stackIndex in range(0,numStacks):
 
 	imageStartIndex = stackIndex * numTimepoints # 0 for the first one
 	imageEndIndex = imageStartIndex + numTimepoints # 0 through 25 if there are 25 timepoints
-	print "Creating stack", stackIndex, "from images",imageStartIndex,"to",imageEndIndex
+	#print "Creating stack", stackIndex, "from images",imageStartIndex,"to",imageEndIndex
 	
 	currentFile = os.path.basename(fnames[imageStartIndex])
-	print "First filename:",currentFile
+	#print "First filename:",currentFile
 	
 	imp = IJ.openImage(os.path.join(inputdir, fnames[imageStartIndex])) # open first image
 	ip = imp.getProcessor()
@@ -62,7 +62,7 @@ for stackIndex in range(0,numStacks):
 	
 	for fnameIndex in range(imageStartIndex + 1, imageEndIndex): # subset of the original array
 		currentFile = os.path.basename(fnames[fnameIndex])
-		print "Adding image",currentFile
+		#print "Adding image",currentFile
 		imp = IJ.openImage(os.path.join(inputdir, currentFile)) # open next image
 		ip = imp.getProcessor()
 		new_stack.addSlice(currentFile, ip) # slice label is orig file name
