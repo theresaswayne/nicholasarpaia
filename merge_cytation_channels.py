@@ -18,10 +18,13 @@ from ij import IJ, ImagePlus, ImageStack
 from ij.process import ImageProcessor, FloatProcessor, StackProcessor
 import string
 from ij.plugin import RGBStackMerge
+from ij import WindowManager
 
 
 
 # Create the arrays first
+
+wm = WindowManager
 
 # ---- Find image files ---- 
 inputDir = str(inDir) # convert the directory object into a string
@@ -96,11 +99,18 @@ for i in range(0, len(C1)):
 
 	# clean up
 	# impMerge.flush()
-	#impMerge.close()
-	impMerge = None
+	# impMerge.close() # throws error
+	impMerge = None #doesn't seem to solve memory problem
+	#imp1.close()
+	#imp2.close()
+	#imp3.close()
 	imp1 = None
 	imp2 = None
 	imp3 = None
+	
+	win = wm.getWindow(outputName)
+	win.close()
+	IJ.run("Collect Garbage")
 
 IJ.log("Finished")
 
