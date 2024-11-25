@@ -60,8 +60,9 @@ for index in range(1, n_slices+1):
 	IJ.run("DiAna_Analyse", "img1="+TsliceName+" img2="+FsliceName+" lab1="+TsliceName+" lab2="+FsliceName+" coloc")
 	
 	# save results
-	outputName = string.join((str(index), "_ColocResults.csv"), "")
-	print("Saving as", outputName)
+	indexPadded = str(index).zfill(3)
+	outputName = string.join((indexPadded, "_ColocResults.csv"), "")
+	#print("Saving as", outputName)
 	rt_Window= WindowManager.getWindow("ColocResults")
 	rt = rt_Window.getResultsTable()
 	rt.save(os.path.join(outputdir, outputName))
