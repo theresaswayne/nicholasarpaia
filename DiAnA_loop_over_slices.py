@@ -12,16 +12,28 @@ import io
 from net.imglib2.view import Views
 from ij import IJ, ImagePlus, ImageStack
 from ij.process import ImageProcessor, FloatProcessor, StackProcessor
+from ij.process import ImageConverter
 import string
 from ij.measure import ResultsTable
 from ij import WindowManager
 
-
+IJ.run("Conversions...", " ")
+#IJ.setOption("ScaleConversions", false)
 
 # ---- Load files ----
 
 TregImp = IJ.openImage(str(TregFile))
 FbImp = IJ.openImage(str(FbFile))
+
+ic = ImageConverter(TregImp)
+ic.convertToGray16()
+TregImp.updateImage()
+#TregImp.show()
+
+ic = ImageConverter(FbImp)
+ic.convertToGray16()
+FbImp.updateImage()
+#FbImp.show()
 
 TregStack = TregImp.getStack() # get the stack within the ImagePlus
 FbStack = FbImp.getStack() # get the stack within the ImagePlus
@@ -61,14 +73,3 @@ for index in range(1, n_slices+1):
 	FsliceImp.close()
 	
 
-#row=0
-#for roi in RoiManager.getInstance().getRoisAsArray():
-#  a = rt.getValue("Feret", row)
-#  b = rt.getValue("MinFeret", row)
-#  nu= 1
-#  L = 1
-#  p = 1
-#  s = (math.pi/4) * (1/(nu*L)) * math.pow(a, 3) * math.pow(b, 3) / (math.pow(a, 2) + math.pow(a, 2))*p
-#  rt.setValue("S", row, s)
-#  row = row + 1
-#rt.show("Results")
