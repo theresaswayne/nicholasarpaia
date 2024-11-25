@@ -22,6 +22,9 @@ IJ.run("Conversions...", " ")
 
 # ---- Load files ----
 
+TregPath = TregFile.getPath()
+TregName = os.path.basename(TregPath)
+
 TregImp = IJ.openImage(str(TregFile))
 FbImp = IJ.openImage(str(FbFile))
 
@@ -61,7 +64,8 @@ for index in range(1, n_slices+1):
 	
 	# save results
 	indexPadded = str(index).zfill(3)
-	outputName = string.join((indexPadded, "_ColocResults.csv"), "")
+	basename = TregName.split("_")[1] # should be ROI name
+	outputName = string.join((indexPadded,"_",basename, "_ColocResults.csv"), "")
 	#print("Saving as", outputName)
 	rt_Window= WindowManager.getWindow("ColocResults")
 	rt = rt_Window.getResultsTable()

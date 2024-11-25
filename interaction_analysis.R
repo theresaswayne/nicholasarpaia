@@ -27,8 +27,8 @@ objBname = "Fibroblast"
 # if time window == threshold, then you must have that many consecutive interactions
 # if time window > threshold, then the interactions may be non-consecutive but must occur within the window
 
-timeWindow <- 3
-threshold <- 3
+timeWindow <- 22
+threshold <- 8
 
 # ---- Get the data ----
 # no message will be displayed. Choose the file to analyze
