@@ -7,7 +7,6 @@
 # number of objects in the A class that show interactions
 # number of objects in the A class that show persistent interactions 
 
-# (extends interaction_analysis.R)
 # To use: 
 # 1) Generate a merged colocalization file for one imaging field using combine_csv_files_with_num.R
 # 2) Edit Parameters section (object names, time window, interaction threshold) as needed
@@ -143,7 +142,6 @@ survData <- data.frame(ObjA = character(),
                        stringsAsFactors = FALSE)
 
 # which objAs have persistent interactions?
-
 persistObjs <- persistSummary$ObjA[persistSummary$Persistent == TRUE]
 persistObjs <- as.character(sort(as.integer(unique(persistObjs)))) 
 
@@ -159,7 +157,6 @@ for (obj in persistObjs) {
   
   # handle interactions at end of expt
   # set status 1 = event (end of interaction), 0 = censored (still "alive" at end of experiment)
-  #status <- ifelse(intxnEnd == Inf, 0, 1)
   if(is.infinite(intxnEnd)) {
     status <- 0
     }
@@ -203,7 +200,7 @@ write_csv(survSumm,file.path(parentFolder, survFit))
 plotFile = paste(sans_ext(basename(selectedFile)), "_plot_",timeWindow, "_",threshold,".png", sep = "")
 ggsave(filename = plotFile, path = parentFolder)
 
-# persistSummary (derived data)
+# persistSummary (which objects showed persistent interactions)
 persistFile = paste(sans_ext(basename(selectedFile)), "_persistence_",timeWindow, "_",threshold,".csv", sep = "")
 write_csv(persistSummary,file.path(parentFolder, persistFile))
 
