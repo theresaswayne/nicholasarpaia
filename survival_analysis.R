@@ -20,7 +20,10 @@ require(stringr) # for string harvesting
 require(RcppRoll) # for scanning interactions
 require(xfun) # for filename manipulation
 require(survival) # for survival analysis
-
+require(survminer) # for survival analysis
+require(ggplot2) # for survival output
+require(broom) # for survival output
+ 
 # ---- Parameters ----
 # change these as needed 
 
@@ -128,9 +131,10 @@ fracPersistent <- totalPersistent/totalIntxns
 # ---- Survival analysis ----
 
 # start with the table of interactions
-# we will analyze the first interaction only
-# assuming that each Treg is unlikely to interact with multiple Fbs
-# but this assumes tracking is accurate (same Fb is always assigned the same object number)
+# filter for those objects undergoing persistent interactions
+# for each object, we will analyze the first interaction only
+# -- assuming that each Treg is unlikely to interact with multiple Fbs
+# -- this in turn assumes tracking is accurate (same Fb is always assigned the same object number)
 
 # create an empty table to hold the results
 survData <- data.frame(ObjA = character(),
@@ -138,7 +142,12 @@ survData <- data.frame(ObjA = character(),
                        Status = double(),
                        stringsAsFactors = FALSE)
 
-for (obj in objA_IDs) {
+# which objAs have persistent interactions?
+
+persistObjs <- persistSummary$ObjA[persistSummary$Persistent == TRUE]
+persistObjs <- as.character(sort(as.integer(unique(persistObjs)))) 
+
+for (obj in persistObjs) {
   # select the object column and find the start time (earliest timepoint of interaction)
   intxnTimes <- intxns %>% 
     filter(intxns[[obj]] == TRUE)
@@ -147,23 +156,28 @@ for (obj in objA_IDs) {
   # find the end time of that interaction and the total duration
   laterTimes <- intxns %>% filter(t > intxnStart)
   intxnEnd <- min(laterTimes$t[laterTimes[[obj]] == FALSE])
+  
+  # handle interactions at end of expt
+  # set status 1 = event (end of interaction), 0 = censored (still "alive" at end of experiment)
+  #status <- ifelse(intxnEnd == Inf, 0, 1)
+  if(is.infinite(intxnEnd)) {
+    status <- 0
+    }
+  else {
+    status <- 1
+    }
   intxnDur <- intxnEnd - intxnStart
   # create a new row in the data table 
-  # (the last column is always 1, signifying the "death" of the interaction)
   survData <- survData %>% add_row(ObjA = obj,
           Duration = intxnDur, 
-          Status = 1)
+          Status = status)
   }
 
-# TODO: Filter by persistent interactions, remove Inf values
-# TODO: Combine data from replicates and groups and plot together
-
-# TODO: move duration to parameters section and include in output
-survDataFilt <- survData %>% filter(Duration >= 4)
-
+# fit and plot the survival curve using Kaplan-Meier method
 fit1 <- survfit(Surv(Duration, Status) ~ 1, data=survData)
-fitFilt <- survfit(Surv(Duration, Status) ~ 1, data=survDataFilt)
-
+p <- ggsurvplot(fit1, data = survData, risk.table = FALSE,
+                submain = "Kaplan-Meier survival curve",
+)
 # ---- Create output ----
 
 resultHeaders <- c("Filename", "Window", "Threshold", "Total Interacting",  "Persistent Interacting","Fraction Persistent")
@@ -181,8 +195,13 @@ survTable = paste(sans_ext(basename(selectedFile)), "_surv_",timeWindow, "_",thr
 write_csv(survData,file.path(parentFolder, survTable))
 
 # survival fit table
-survFit = paste(sans_ext(basename(selectedFile)), "_survFit_.csv", sep = "")
-write_csv(fit1,file.path(parentFolder, survFit))
+survSumm <- tidy(fit1)
+survFit = paste(sans_ext(basename(selectedFile)), "_survFit_",timeWindow, "_",threshold,".csv", sep = "")
+write_csv(survSumm,file.path(parentFolder, survFit))
+
+# survival plot
+plotFile = paste(sans_ext(basename(selectedFile)), "_plot_",timeWindow, "_",threshold,".png", sep = "")
+ggsave(filename = plotFile, path = parentFolder)
 
 # persistSummary (derived data)
 persistFile = paste(sans_ext(basename(selectedFile)), "_persistence_",timeWindow, "_",threshold,".csv", sep = "")
