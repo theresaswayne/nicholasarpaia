@@ -155,7 +155,14 @@ for (obj in objA_IDs) {
           Status = 1)
   }
 
+# TODO: Filter by persistent interactions, remove Inf values
+# TODO: Combine data from replicates and groups and plot together
+
+# TODO: move duration to parameters section and include in output
+survDataFilt <- survData %>% filter(Duration >= 4)
+
 fit1 <- survfit(Surv(Duration, Status) ~ 1, data=survData)
+fitFilt <- survfit(Surv(Duration, Status) ~ 1, data=survDataFilt)
 
 # ---- Create output ----
 
